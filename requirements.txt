@@ -1,0 +1,7 @@
+playwright
+pandas
+pydantic
+python-dateutil
+PyYAML
+tenacity
+pypdf
