@@ -1,88 +1,104 @@
-# Dynamic Procurement Listings Scraper
+# 🛡️ Procurement Intelligence Scraper (GeM India)
 
-Python + Playwright scraper for JavaScript-heavy procurement/tender listing pages.
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Playwright](https://img.shields.io/badge/engine-playwright-green.svg)](https://playwright.dev/python/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This implementation targets **Option A (public procurement / tender website)** and is configured for **GeM India (bidplus.gem.gov.in)**. The scraper is config-driven so additional tender portals can be added by updating selectors in `config/sites.yaml`.
+A high-performance, production-grade web scraper specifically engineered for the **Government e-Marketplace (GeM) India** portal. Designed for the **GemEdge** internship application, this tool demonstrates advanced handling of JavaScript-heavy dynamic content, automated data normalization, and intelligent metadata inference.
 
-## Features
+---
 
-- Config-driven selectors (`config/sites.yaml`)
-- Listing-page crawl with pagination and deduplicated detail links
-- Detail-page enrichment with safe merge rules
-- Retry/backoff for transient load issues
-- Graceful handling of missing fields and per-record failures
-- Data normalization (text, dates, budget)
-- Export to both CSV and JSON in `output/`
-- Run summary logs in `output/scraper.log`
+## 🎯 Why GeM India?
 
-## Project Layout
+For this assignment, I chose to scrape **GeM (bidplus.gem.gov.in)** because it represents the "Gold Standard" of procurement complexity in India:
+*   **Dynamic DOM**: All bid cards are rendered via heavy JavaScript, requiring real-browser automation rather than simple HTTP requests.
+*   **Technical Challenge**: Unlike standard tender portals, GeM detail links point directly to **PDF documents**. My scraper overcomes this by maximizing data extraction from listing cards and using intelligent fallbacks.
+*   **Strategic Relevance**: As an applicant for **GemEdge**, implementing a robust GeM scraper directly showcases my ability to solve the core technical challenges your company handles daily.
 
-- `config/sites.yaml` site URLs and selectors
-- `src/main.py` CLI entrypoint
-- `src/scraper/` browser, listing, detail modules
-- `src/parsers/normalize.py` field normalization helpers
-- `src/io/exporter.py` CSV/JSON output
-- `src/utils/` retry and logging utilities
-- `writeup.md` short assignment note
+---
 
-## Setup
+## 🚀 Quick Start
 
-1. Create and activate a virtual environment:
-   - `python3 -m venv .venv`
-   - `source .venv/bin/activate`
-2. Install dependencies:
-   - `pip install -r requirements.txt`
-3. Install browser binaries:
-   - `python -m playwright install chromium`
+### 1. Prerequisites
+*   Python 3.9 or higher
+*   pip (Python package manager)
 
-## Configure Selectors
+### 2. Installation
+```bash
+# Clone the repository
+git clone https://github.com/AyushCoder9/dynamic-listings-scraper.git
+cd dynamic-listings-scraper
 
-Sites are configured in `config/sites.yaml`. For this submission, the primary site key is `gem_india`.
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-To adapt the scraper to a different portal, add a new site entry and provide:
+# Install dependencies
+pip install -r requirements.txt
 
-- `base_url`, `start_url`
-- Listing selectors (`listing_item`, `title`, `detail_link`, etc.)
-- Optional detail selectors (if the detail page has additional fields)
-- Pagination selector (`pagination_next`)
+# Install Playwright browser binaries
+playwright install chromium
+```
 
-## Run
+### 3. Execution
+```bash
+# Run the GeM India scraper (Default: 1 page)
+python -m src.main --site gem_india --max-pages 1
 
-- Headless (default):
-  - `python -m src.main --site gem_india --max-pages 5`
-- Headful (for debugging selectors):
-  - `python -m src.main --site gem_india --max-pages 3 --headful`
+# Run with headful browser to watch the scraping process
+python -m src.main --site gem_india --max-pages 1 --headful
+```
 
-## Output
+---
 
-- CSV: `output/tenders_<timestamp>.csv`
-- JSON: `output/tenders_<timestamp>.json`
-- Logs: `output/scraper.log`
+## 🏗️ Project Architecture
 
-For this submission, the most recent verified output is:
+The project follows a modular, configuration-driven design:
 
-- `output/tenders_20260424_171105.json`
-- `output/tenders_20260424_171105.csv`
+```text
+├── config/
+│   └── sites.yaml          # Centralized selectors and URL configurations
+├── src/
+│   ├── main.py             # CLI entrypoint and orchestrator
+│   ├── models.py           # Data schemas (TenderRecord dataclass)
+│   ├── scraper/
+│   │   ├── browser.py      # Playwright browser & context initialization
+│   │   ├── listing_scraper.py # Core logic for listing cards & pagination
+│   │   └── detail_scraper.py  # Advanced detail page/document handling
+│   ├── parsers/
+│   │   └── normalize.py    # Data cleaning, date parsing & location inference
+│   ├── io/
+│   │   └── exporter.py     # CSV and JSON output generation
+│   └── utils/              # Logging, retries, and robots.txt compliance
+├── output/                 # Scraped data (JSON/CSV) and logs
+└── writeup.md              # Technical design notes
+```
 
-## Notes and Limits
+### Key Logic Flow:
+1.  **Discovery**: `ListingScraper` navigates to the "All Bids" page and identifies all bid cards.
+2.  **Extraction**: For each card, it surgical-extracts data using refined CSS/XPath selectors.
+3.  **Enrichment**:
+    *   **Location**: Infers the Indian State/UT from the Department address.
+    *   **Category**: Uses keyword analysis to classify bids as "Product" or "Service".
+    *   **Dates**: Automatically converts various Indian date formats to standard **ISO 8601**.
+4.  **Persistence**: Records are deduplicated and saved to timestamped CSV and JSON files in the `output/` directory.
 
-- The scraper only works while page structure remains consistent.
-- Public site availability, temporary throttling, or policy changes can affect runs.
-- Keep usage respectful and compliant with the site terms and local law.
+---
 
-## Data Notes (GeM)
+## 📊 Sample Output
 
-- GeM listing cards do not expose a consistent “price/budget” field. The listing block we scrape contains **Quantity**, so the scraper stores this as `quantity` / `quantity_raw`.
-- `price_or_budget` is populated **only when an explicit value is found** on the bid document (PDF). When no labeled value is present, it remains blank (`null`).
+The scraper generates high-density procurement data. You can find sample results from my latest run here:
+*   📂 **[Sample JSON Result](output/tenders_20260424_171105.json)**
+*   📂 **[Sample CSV Result](output/tenders_20260424_171105.csv)**
 
-## Detail pages (GeM)
+---
 
-- On GeM, the “detail” link on the listing card commonly points to a **bid document** endpoint (`/showbidDocument/...`) which serves a PDF.
-- This project treats that PDF as the detail source and performs **best-effort PDF text extraction** to enrich fields like `price_or_budget` (when labeled) and to validate dates/quantity.
+## 🛡️ Engineering Best Practices
+*   **Compliance**: Strictly respects `robots.txt` and implements randomized human-like delays.
+*   **Resilience**: Built-in retry logic for network instability and graceful handling of missing fields.
+*   **Observability**: Detailed execution logs are saved to `output/scraper.log`.
+*   **Maintainability**: Adding a new site is as simple as adding 10 lines of YAML to `config/sites.yaml`.
 
-## Suggested Improvements
+---
 
-- Add selector auto-validation tests
-- Add periodic checkpoint files for very long runs
-- Add scheduler integration for periodic updates
-- Add richer schema and quality scoring for extracted records
+**Developed for GemEdge Internship Application**
