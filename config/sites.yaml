@@ -1,0 +1,106 @@
+sites:
+  find_tender_uk:
+    name: "Find a Tender (UK)"
+    base_url: "https://www.find-tender.service.gov.uk"
+    start_url: "https://www.find-tender.service.gov.uk/Search/Results"
+    timeout_ms: 60000
+    delays:
+      min_seconds: 1.0
+      max_seconds: 2.0
+    selectors:
+      listing_container: "body"
+      listing_item: "div.search-result"
+      title: ".search-result-header h2 a"
+      organization: ".search-result-sub-header"
+      price: "div.search-result-entry:has(dt:has-text('value')) dd"
+      category: "div.search-result-entry:has(dt:has-text('Notice type')) dd"
+      date_posted: "div.search-result-entry:has(dt:has-text('Publication date')) dd"
+      date_closing: "div.search-result-entry:has(dt:has-text('Submission deadline')) dd"
+      detail_link: ".search-result-header h2 a"
+      pagination_next: "a:has-text('Next')"
+      detail_title: "h1"
+      detail_organization: ".search-result-sub-header"
+      detail_price: ".govuk-summary-list__row:has(dt:has-text('value')) dd"
+      detail_category: "h3:has-text('classification') + ul li"
+      detail_date_posted: "dt:has-text('Publication date') + dd"
+      detail_date_closing: "dt:has-text('deadline') + dd"
+      detail_location: "h3:has-text('location') + ul li"
+      detail_tender_reference: "p.govuk-body-s:has-text('Notice identifier')"
+
+  gem_india:
+    name: "GeM India (Government e-Marketplace)"
+    base_url: "https://bidplus.gem.gov.in"
+    start_url: "https://bidplus.gem.gov.in/all-bids"
+    timeout_ms: 60000
+    delays:
+      min_seconds: 1.5
+      max_seconds: 3.0
+    selectors:
+      listing_container: "body"
+      listing_item: ".card"
+      title: "div.row:has(strong:has-text('Items')) a"
+      organization: "div.row:has(strong:has-text('Department')) + div.row"
+      price: "div.row:has(strong:has-text('Quantity'))"
+      date_posted: ".start_date"
+      date_closing: ".end_date"
+      tender_id: ".bid_no a"
+      detail_link: ".bid_no a"
+      pagination_next: "a.page-link.next"
+      # Optional, only used if a detail page exposes quantity explicitly
+      detail_quantity: null
+
+  sam_gov_us:
+    name: "SAM.gov Opportunities (US)"
+    base_url: "https://sam.gov"
+    start_url: "https://sam.gov/search/?index=opp&page=1&pageSize=25&sort=-modifiedDate&sfm%5Bstatus%5D%5Bis_active%5D=true"
+    timeout_ms: 90000
+    delays:
+      min_seconds: 1.5
+      max_seconds: 3.0
+    selectors:
+      listing_container: "body"
+      listing_item: "sds-search-result-list article"
+      title: "h3 a, h2 a, .result-title a"
+      organization: ".result-agency, .organization, .result-subtitle"
+      price: ".award-amount, .result-amount"
+      category: ".notice-type, .result-notice-type"
+      date_posted: ".posted-date, .published-date"
+      date_closing: ".response-date, .offers-due-date"
+      detail_link: "h3 a, h2 a, .result-title a"
+      pagination_next: "a[aria-label*='Next'], button[aria-label*='Next']"
+      detail_title: "h1"
+      detail_organization: ".agency-name, .organization"
+      detail_price: ".award-amount, .value"
+      detail_category: ".notice-type"
+      detail_date_posted: ".published-date"
+      detail_date_closing: ".response-date"
+      detail_location: ".place-of-performance"
+      detail_tender_reference: ".notice-id, .solicitation-number"
+
+  etenders_za:
+    name: "eTenders Portal (South Africa)"
+    base_url: "https://www.etenders.gov.za"
+    start_url: "https://www.etenders.gov.za/Home/opportunities?id=1"
+    timeout_ms: 60000
+    delays:
+      min_seconds: 1.0
+      max_seconds: 2.0
+    selectors:
+      listing_container: "body"
+      listing_item: "table#tendeList tbody tr"
+      title: "td.sorting_1"
+      organization: "td.break-word"
+      price: null
+      category: "td.break-word"
+      date_posted: "td:nth-child(5)"
+      date_closing: "td:nth-child(6)"
+      detail_link: "a[href*='/Tender/'], a[href*='/opportunity/']"
+      pagination_next: null
+      detail_title: "h1, h2"
+      detail_organization: ".organ-of-state, .organization"
+      detail_price: ".budget, .estimated-value"
+      detail_category: ".category"
+      detail_date_posted: ".published-date"
+      detail_date_closing: ".closing-date"
+      detail_location: ".location"
+      detail_tender_reference: ".tender-number, .reference"
