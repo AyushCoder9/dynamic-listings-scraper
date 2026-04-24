@@ -1,0 +1,9 @@
+I built a modular Python scraper (Playwright) to extract structured tenders from a dynamic public procurement portal (Option A). For this submission it targets **GeM India** (`bidplus.gem.gov.in`) and is **config-driven** via `config/sites.yaml`, so the same pipeline can be adapted to other portals by swapping URLs/selectors.
+
+Approach: the scraper crawls the **listing pages** (`/all-bids`), paginates for a configurable number of pages, extracts summary fields from each card, and **deduplicates** discovered detail links. On GeM, the “detail page” is frequently a **bid document endpoint** (`/showbidDocument/<id>`) that serves a **PDF**. The scraper treats this PDF as the detail source and performs **best‑effort PDF text extraction** (first pages only) to enrich fields when explicit labels are present (e.g., “Bid Value”). It merges listing and detail values using a simple precedence rule: **prefer detail values when available; otherwise keep listing values**.
+
+Data quality: before exporting, it normalizes whitespace/labels, parses dates into **ISO format** when possible, and keeps `*_raw` fields for traceability (useful for debugging and for portals with messy/compound text blocks). For GeM specifically, listing cards reliably expose **Quantity** but not a consistent “price/budget”, so the scraper stores quantity separately and only fills `price_or_budget` when an explicit labeled value is found in the PDF.
+
+Robustness & respectfulness: the run performs a robots.txt allow-check, adds randomized delays between requests, and uses retry/backoff for transient failures. PDF enrichment is intentionally best-effort (per-record failures are captured without aborting the run).
+
+What could break and improvements: selector/DOM changes, pagination changes, throttling/403s, or PDF layout changes. Next improvements would be selector health checks, checkpoint/resume for long runs, and richer field extraction from PDFs.
